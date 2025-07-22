@@ -1,0 +1,75 @@
+import React, {useState, useEffect} from 'react';
+import axios from "axios";
+
+function App() {
+
+  //data pulled from back end as an array.
+  const [tasks, setTasks] = useState ([]);
+  //user input of a new task as a string
+  const [newTasks, setNewTask] = useState("");
+
+  //sends GET request to flask in the back end.
+  const fetchTasks = async () => {
+      const res = await axios.get("http://127.0.0.1:5000/tasks");
+      //updates tasks state with response from frontend
+      setTasks(res.data)
+  }
+
+  //Load tasks on page
+  useEffect(() => {
+    //fetching backend data
+    fetchTasks();
+  }, [])
+
+  //posts new task to the task array in the back end
+  const addTask = async () => {
+    await axios.post("http://127.0.0.1:5000/tasks", {title: newTasks});
+    setNewTask("");
+    await fetchTasks();
+  };
+
+  const toggleTask = async (id) =>{
+    await axios.put(`http://127.0.0.1:5000/tasks/${id}`);
+    await fetchTasks();
+  };
+
+  const deleteTask = async (id) => {
+    await axios.delete(`http://127.0.0.1:5000/tasks/${id}`);
+    await fetchTasks();
+  };
+
+  return (
+      <div style={{ padding: "50px"}}>
+      <h1>Grace's To-Do List</h1>
+
+      <input
+        value={newTasks}
+        onChange={(e) => setNewTask(e.target.value)}
+        placeholder="enter new task.."
+        />
+      <button onClick={addTask}>add task</button>
+
+
+      <ul>
+        {tasks.map((task)=> (
+            <li key={task.id}>
+            <span
+            style={{
+              textDecoration: task.completed ? "line-through" : "none",
+              cursor: "pointer",
+            }}
+            onClick={() => toggleTask(task.id)}
+    >
+            {task.title}
+          </span>
+
+          <button onClick={() => deleteTask(task.id)}>delete task</button>
+
+            </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+export default App;
