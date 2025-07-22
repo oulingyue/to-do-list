@@ -52,18 +52,18 @@ function App() {
 
       <ul>
         {tasks.map((task)=> (
-            <li key={task.id}>
+            <li key={task.title}>
             <span
             style={{
               textDecoration: task.completed ? "line-through" : "none",
               cursor: "pointer",
             }}
-            onClick={() => toggleTask(task.id)}
+            onClick={() => toggleTask(task.title)}
     >
             {task.title}
           </span>
 
-          <button onClick={() => deleteTask(task.id)}>delete task</button>
+          <button onClick={() => deleteTask(task.title)}>delete task</button>
 
             </li>
         ))}
