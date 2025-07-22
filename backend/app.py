@@ -31,24 +31,22 @@ def add_task():
     return jsonify(task), 201
 
 @app.route("/tasks/<int:task_id>", methods=['PUT'])
-def update_task(id_number):
+def update_task(task_id):
     for task in tasks:
-        if task["id"] == id_number:
+        if task["id"] == task_id:
             task["completed"] = not task["completed"]
             return jsonify(task)
     return jsonify({"error": "Task not found"}), 404
 
 @app.route("/tasks/<int:task_id>", methods=['DELETE'])
-def delete_task(id_number):
+def delete_task(task_id):
     global tasks
-    global task_id
     ## tasks = [t for t in tasks if t["id"] != task_id]
     new_tasks = []
     for task in tasks:
-        if task["id"] != id_number:
+        if task["id"] != task_id:
             new_tasks.append(task)
     tasks = new_tasks
-    task_id = len(tasks)
     return jsonify({"result": True})
 
 
