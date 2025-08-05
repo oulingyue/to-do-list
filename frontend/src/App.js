@@ -1,18 +1,26 @@
-import React, {useState, useEffect} from 'react';
-import axios from "axios";
+import React, {useState, useEffect, use} from 'react';
+import './App.css'
+import axios from 'axios';
 
 function App() {
 
   //data pulled from back end as an array.
   const [tasks, setTasks] = useState ([]);
+
   //user input of a new task as a string
   const [newTasks, setNewTask] = useState("");
 
+  useEffect(() => {
+    fetchTasks();
+  }, []);
+
   //sends GET request to flask in the back end.
   const fetchTasks = async () => {
-      const res = await axios.get("http://127.0.0.1:5000/tasks");
+      const res = await fetch("http://127.0.0.1:5000/tasks");
+      const data = await res.json();
       //updates tasks state with response from frontend
-      setTasks(res.data)
+      setTasks(data.tasks);
+      console.log(data.tasks);
   }
 
   //Load tasks on page

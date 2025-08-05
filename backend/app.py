@@ -12,16 +12,16 @@ def get_check():
 @app.route("/tasks", methods=['GET'])
 def get_tasks():
     tasks = Task.query.all()
-    json_contacts = list(map(lambda task:task.to_json(), tasks))
-    return jsonify({"contacts": json_contacts})
+    json_tasks = list(map(lambda task:task.to_json(), tasks))
+    return jsonify({"tasks": json_tasks})
 
 
 @app.route("/tasks", methods=['POST'])
 def add_task():
-    title = request.json.get("title")
-    if not title:
-        return jsonify({"error": "Title is required"}), 400
-    new_contact = Task(title=title);
+    content = request.json.get("content")
+    if not content:
+        return jsonify({"error": "content is required"}), 400
+    new_contact = Task(content=content);
     try:
         db.session.add(new_contact)
         db.session.commit()
@@ -35,23 +35,19 @@ def update_task(task_id):
     if not task:
         return jsonify({"error": "Task not found"}), 404
 
-    completed = request.json.get("completed")
-    if completed is not None:
-        task.completed = not task.completed
-
+    task.completed = not task.completed
     db.session.commit()
     return jsonify({"message": "Task updated successfully"}), 200
 
 @app.route("/tasks/<int:task_id>", methods=['DELETE'])
-def delete_task(task_title):
-    global tasks
-    ## tasks = [t for t in tasks if t["id"] != task_id]
-    new_tasks = ToDoListModel()
-    for task in tasks.get_tasks():
-        if task.title != task.get_title():
-            new_tasks.add_task(task)
-    tasks = new_tasks
-    return jsonify({"result": True})
+def delete_task(task_id):
+    task = Task.query.get(task_id)
+    if not task:
+        return jsonify({"error": "Task not found"}), 404
+
+    db.session.delete(task)
+    db.session.commit()
+    return jsonify({"message": "Task deleted successfully"}), 200
 
 
 if __name__ == '__main__':

@@ -17,7 +17,7 @@ class Task(db.Model):
     def to_json(self):
         return {
             "id": self.id,
-            "title": self.title,
+            "content": self.content,
             "user": self.user,
             "completed": self.completed,
             "created_at": self.created_at.isoformat()
