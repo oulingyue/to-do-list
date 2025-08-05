@@ -1,41 +1,46 @@
-from flask import Flask, request, jsonify
+from flask import request, jsonify
 from flask_cors import CORS
+from config import app, db
 from Task import Task
 from TdsModel import ToDoListModel
-
-app = Flask(__name__)
-CORS(app) #Allow requests from react
-
-# in-memory "database"
-# task attributes: id, title, completed, created at, due date
-tasks = ToDoListModel()
-# task1 = Task("Task 1")
-# tasks.add_task(task1)
 
 
 @app.route('/', methods=['GET'])
 def get_check():
-    return jsonify(tasks.get_tasks())
+    return "welcome to the To-Do List API!"
 
 @app.route("/tasks", methods=['GET'])
-def get_tasks(): #code for application
-    return jsonify(tasks.get_tasks())
+def get_tasks():
+    tasks = Task.query.all()
+    json_contacts = list(map(lambda task:task.to_json(), tasks))
+    return jsonify({"contacts": json_contacts})
+
 
 @app.route("/tasks", methods=['POST'])
 def add_task():
-    global tasks
-    data = request.get_json()
-    task = Task(data['title'])
-    tasks.add_task(task)
-    return jsonify(task), 201
+    title = request.json.get("title")
+    if not title:
+        return jsonify({"error": "Title is required"}), 400
+    new_contact = Task(title=title);
+    try:
+        db.session.add(new_contact)
+        db.session.commit()
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+    return jsonify({"message": "Task created successfully"}), 201
 
 @app.route("/tasks/<int:task_id>", methods=['PUT'])
-def update_task(task_title):
-    for task in tasks.get_tasks():
-        if task.get_title == task_title:
-            task["completed"] = not task["completed"]
-            return jsonify(task)
-    return jsonify({"error": "Task not found"}), 404
+def update_task(task_id):
+    task = Task.query.get(task_id)
+    if not task:
+        return jsonify({"error": "Task not found"}), 404
+
+    completed = request.json.get("completed")
+    if completed is not None:
+        task.completed = not task.completed
+
+    db.session.commit()
+    return jsonify({"message": "Task updated successfully"}), 200
 
 @app.route("/tasks/<int:task_id>", methods=['DELETE'])
 def delete_task(task_title):
@@ -50,4 +55,7 @@ def delete_task(task_title):
 
 
 if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
+
     app.run(debug=True)
