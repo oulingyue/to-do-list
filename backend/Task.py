@@ -1,26 +1,31 @@
 from config import db
+import uuid
 """
 to-do list project
 This file contains the task class that represents
 individual to-do task s in a to-do list.
 """
 
-class Task(db.Model):
+class Task():
     """
     this class represents an individual to-do task.
     """
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100), nullable=False)
-    completed = db.Column(db.Boolean, default=False)
-    created_at = db.Column(db.DateTime, server_default=db.func.now())
-    
-    def to_json(self):
-        return {
-            "id": self.id,
-            "content": self.content,
-            "user": self.user,
-            "completed": self.completed,
-            "created_at": self.created_at.isoformat()
-        }
+    # id = db.Column(db.Integer, primary_key=True)
+    # content = db.Column(db.String(100), nullable=False)
+    # completed = db.Column(db.Boolean, default=False)
+    # created_at = db.Column(db.DateTime, server_default=db.func.now())
+    def __init__(self, content):
+        self.content = content
+        self.completed = False
+        self.id = uuid.uuid4()
+        
+    def toggle_task(self):
+        self.completed = not self.completed
+    # def to_json(self):
+    #     return {
+    #         "id": self.id,
+    #         "content": self.content,
+    #         "completed": self.completed,
+    #     }
     
         
