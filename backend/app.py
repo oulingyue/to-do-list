@@ -1,57 +1,42 @@
 from flask import request, jsonify
 from flask_cors import CORS
-from config import app, db
+from config import app
 from Task import Task
-from TdsModel import ToDoListModel
 
+todos = []
 
 @app.route('/', methods=['GET'])
-def get_check():
+def get_welcome():
     return "welcome to the To-Do List API!"
 
 @app.route("/tasks", methods=['GET'])
 def get_tasks():
-    tasks = Task.query.all()
-    json_tasks = list(map(lambda task:task.to_json(), tasks))
-    return jsonify({"tasks": json_tasks})
-
+    return jsonify([task.to_dict() for task in todos]), 200
 
 @app.route("/tasks", methods=['POST'])
 def add_task():
-    content = request.json.get("content")
-    if not content:
-        return jsonify({"error": "content is required"}), 400
-    new_contact = Task(content=content);
-    try:
-        db.session.add(new_contact)
-        db.session.commit()
-    except Exception as e:
-        return jsonify({"error": str(e)}), 400
-    return jsonify({"message": "Task created successfully"}), 201
+    data = request.get_json()
+    if not data or 'content' not in data:
+        return jsonify({"error": "Invalid data"}), 400
+    new_task = Task(content=data['content'])
+    todos.append(new_task)
+    return jsonify(new_task.to_dict()), 201
 
 @app.route("/tasks/<int:task_id>", methods=['PUT'])
 def update_task(task_id):
-    task = Task.query.get(task_id)
-    if not task:
-        return jsonify({"error": "Task not found"}), 404
-
-    task.completed = not task.completed
-    db.session.commit()
-    return jsonify({"message": "Task updated successfully"}), 200
+    for task in todos:
+        if task.id == task_id:
+            task.toggle_task()
+            return jsonify(task.to_dict()), 200
+    return jsonify({"error": "Task not found"}), 404
 
 @app.route("/tasks/<int:task_id>", methods=['DELETE'])
 def delete_task(task_id):
-    task = Task.query.get(task_id)
-    if not task:
-        return jsonify({"error": "Task not found"}), 404
-
-    db.session.delete(task)
-    db.session.commit()
-    return jsonify({"message": "Task deleted successfully"}), 200
-
+    for task in todos:
+        if task.id == task_id:
+            todos.remove(task)
+            return jsonify({"message": "Task deleted successfully"}), 200
+    return jsonify({"error": "Task not found"}), 404
 
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-
     app.run(debug=True)

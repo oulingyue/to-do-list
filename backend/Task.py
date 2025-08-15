@@ -21,11 +21,15 @@ class Task():
         
     def toggle_task(self):
         self.completed = not self.completed
-    # def to_json(self):
-    #     return {
-    #         "id": self.id,
-    #         "content": self.content,
-    #         "completed": self.completed,
-    #     }
+
+    def to_dict(self):
+        """
+        Convert the task to a dictionary representation for json formatting.
+        """
+        return {
+            "id": self.id,
+            "content": self.content,
+            "completed": self.completed,
+        }
     
         
