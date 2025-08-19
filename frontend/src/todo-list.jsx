@@ -12,7 +12,12 @@ function TodoList(){
         const response = await fetch("http://127.0.0.1:5000/tasks");
         const data = await response.json();
         setTasks(data);
+        console.log(data)
     };
+
+    const deleteTask(tasks.id) = async(e) => {
+        const data 
+    }
 
     const addTask = async(e) => {
         e.preventDefault();
@@ -36,12 +41,13 @@ function TodoList(){
             alert(data.message || "Failed to add task");
             return;
         }
+        fetchTasks()
     }
 
   return (
     <div class = "todo-list-container">
         <div className="todo-list">
-            <h2>⋆𐙚₊˚⊹♡ Grace's To-Do List 𐙚₊˚⊹♡</h2>
+            <h2>to-do list:</h2>
                 <div className="row">
                     <input type="text" 
                         id="input-box" 
@@ -55,6 +61,7 @@ function TodoList(){
                 {tasks.map((task) => (
                 <li key={task.id}>
                     {task.content}
+                    <span className = "delete">&times;</span>
                     </li>
                 ))}
             </ul>

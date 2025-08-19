@@ -4,16 +4,10 @@
     font-family: 'Poppins', sans-serif;
     box-sizing: border-box;
 }
-.container{
-    width: 100%;
-    min-height:100vh;
-    background: linear-gradient(135deg, #391f15, #a17461);
-    padding: 10px;
-}
 .todo-list-container{
     width: 100%;
     min-height:200vh;
-    background: linear-gradient(135deg, #391f15, #a17461);
+    background:#a17461;
     padding: 10px;
 }
 
