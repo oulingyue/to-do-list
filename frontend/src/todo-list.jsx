@@ -1,25 +1,39 @@
-import React, {use, useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 
-function TodoList(){
+function TodoList() {
     const [tasks, setTasks] = useState([]);
     const [newTask, setNewTask] = useState("");
 
     useEffect(() => {
-        fetchTasks();
+        fetchTasks()
     }, []);
 
     const fetchTasks = async () => {
-        const response = await fetch("http://127.0.0.1:5000/tasks");
+        const response = await fetch("http://127.0.0.1:5000/tasks", {method: "GET"});
         const data = await response.json();
-        setTasks(data);
+        setTasks(data)
         console.log(data)
     };
 
-    const deleteTask(tasks.id) = async(e) => {
-        const data 
+    const deleteTask = async (id) => {
+        try {
+            const options = {
+                method: "DELETE"
+            }
+            const response = await fetch(`http://127.0.0.1:5000/tasks/${id}`, options)
+            if (response.status == 200) {
+                fetchTasks()
+            } else {
+                console.error("failed to delete data")
+            }
+        }
+        catch(error){
+            alert("checking error" + error)
+        }
+
     }
 
-    const addTask = async(e) => {
+    const addTask = async (e) => {
         e.preventDefault();
         if (!newTask.trim()) {
             alert("oops- you just entered an empty to-do... What do you want to do? nothing!? ");
@@ -44,29 +58,30 @@ function TodoList(){
         fetchTasks()
     }
 
-  return (
-    <div class = "todo-list-container">
-        <div className="todo-list">
-            <h2>to-do list:</h2>
+    return (
+        <div className="todo-list-container">
+            <div className="todo-list">
+                <h2>to-do list:</h2>
                 <div className="row">
-                    <input type="text" 
-                        id="input-box" 
+                    <input type="text"
+                        id="input-box"
                         value={newTask}
                         onChange={(e) => setNewTask(e.target.value)}
                         placeholder="enter new task.."
                     />
                     <button onClick={addTask}>add</button>
                 </div>
-            <ul id="task-list-container">
-                {tasks.map((task) => (
-                <li key={task.id}>
-                    {task.content}
-                    <span className = "delete">&times;</span>
-                    </li>
-                ))}
-            </ul>
+                <ul id="task-list-container">
+                    {tasks.map((task) => (
+                        <li key={task.id}>
+                            {task.content} 
+                            <span onClick={() => deleteTask(task.id)}>&times;</span>
+                            
+                        </li>
+                    ))}
+                </ul>
             </div>
-  </div>)
+        </div>)
 }
 
 export default TodoList;

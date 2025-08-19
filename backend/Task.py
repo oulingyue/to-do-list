@@ -17,7 +17,7 @@ class Task():
     def __init__(self, content):
         self.content = content
         self.completed = False
-        self.id = uuid.uuid4()
+        self.id = str(uuid.uuid4())
         
     def toggle_task(self):
         self.completed = not self.completed

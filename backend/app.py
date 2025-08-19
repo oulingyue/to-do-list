@@ -22,7 +22,7 @@ def add_task():
     todos.append(new_task)
     return jsonify(new_task.to_dict()), 201
 
-@app.route("/tasks/<int:task_id>", methods=['PUT'])
+@app.route("/tasks/<task_id>", methods=['PUT'])
 def update_task(task_id):
     for task in todos:
         if task.id == task_id:
@@ -30,7 +30,7 @@ def update_task(task_id):
             return jsonify(task.to_dict()), 200
     return jsonify({"error": "Task not found"}), 404
 
-@app.route("/tasks/<int:task_id>", methods=['DELETE'])
+@app.route( "/tasks/<task_id>", methods=['DELETE'])
 def delete_task(task_id):
     for task in todos:
         if task.id == task_id:
