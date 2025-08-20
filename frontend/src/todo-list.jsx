@@ -9,11 +9,28 @@ function TodoList() {
     }, []);
 
     const fetchTasks = async () => {
-        const response = await fetch("http://127.0.0.1:5000/tasks", {method: "GET"});
+        const response = await fetch("http://127.0.0.1:5000/tasks", { method: "GET" });
         const data = await response.json();
         setTasks(data)
         console.log(data)
-    };
+    }
+
+    const updateTask = async (id) => {
+        const options = { 
+            method: "PUT" 
+        }
+        try {
+            const response = await fetch(`http://127.0.0.1:5000/tasks/${id}`, options)
+            if (response.status == 200) {
+                fetchTasks()
+            }
+            else {
+                console.error("failed to update task")
+            }
+        } catch (error) {
+            alert(error)
+        }
+    }
 
     const deleteTask = async (id) => {
         try {
@@ -24,11 +41,11 @@ function TodoList() {
             if (response.status == 200) {
                 fetchTasks()
             } else {
-                console.error("failed to delete data")
+                console.error("failed to delete dask")
             }
         }
-        catch(error){
-            alert("checking error" + error)
+        catch (error) {
+            alert(error)
         }
 
     }
@@ -74,9 +91,11 @@ function TodoList() {
                 <ul id="task-list-container">
                     {tasks.map((task) => (
                         <li key={task.id}>
-                            {task.content} 
-                            <span onClick={() => deleteTask(task.id)}>&times;</span>
-                            
+                            <span id = "update" onClick={() => updateTask(task.id)}
+                                style={{ textDecoration: task.completed ? "line-through" : "none", cursor: "pointer" }}
+                            >{task.content}</span>
+                            <span id="delete" onClick={() => deleteTask(task.id)}>&times;</span>
+
                         </li>
                     ))}
                 </ul>
