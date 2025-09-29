@@ -27,10 +27,18 @@ def execute_qry(sql_cmd, params):
     cur = db.cursor(dictionary=True)
     try:
         cur.excecute(sql_cmd, params)
+        if sql_cmd.strip().upper().startswith(("INSERT", "UPDATE", "DELETE")):
+            db.commit()
+            print("Changes committed to the database.")
+            return cur.lastrowid if cur.lastrowid else None
+        else:
+                result = cur.fetchall()
+                return result
     except mysql.connector.error as e:
         db.rollback()
         print(f"failed to query: {e}")
-    finally: cur.close()
+    finally: 
+        cur.close()
 
 def insert_into_table(table_name:str, column1, column2, value1, value2):
     sql_cmd =f"INSERT INTO {table_name} ({column1}, {column2}) values (%s,%s);"
@@ -47,6 +55,8 @@ def get_task_by_id(task_id: str):
     results = execute_qry(sql_cmd,())
     return results[0] if results else None
 
+def delete_task_by_id(task_id: str):
+    sql_cmd = f"DELETE"
 def toggle_task_by_id(task_id:str):
     pass
 
@@ -71,7 +81,7 @@ def add_task():
     if not data or 'content' not in data:
         return jsonify({"error": "Invalid data"}), 400
     new_task = Task(content=data['content'])
-    todos.append(new_task)
+    insert_into_table("task", "content", "task_id", new_task.content, new_task.id)
     return jsonify(new_task.to_dict()), 201
 
 @app.route("/tasks/<task_id>", methods=['PUT'])
