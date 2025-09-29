@@ -56,7 +56,10 @@ def get_task_by_id(task_id: str):
     return results[0] if results else None
 
 def delete_task_by_id(task_id: str):
-    sql_cmd = f"DELETE"
+    sql_cmd = f"DELETE FROM task WHERE id = %s"
+    results = execute_qry(sql_cmd, task_id)
+    return results[0] if results else None
+
 def toggle_task_by_id(task_id:str):
     pass
 
@@ -94,11 +97,11 @@ def update_task(task_id):
 
 @app.route( "/tasks/<task_id>", methods=['DELETE'])
 def delete_task(task_id):
-    for task in todos:
-        if task.id == task_id:
-            todos.remove(task)
-            return jsonify({"message": "Task deleted successfully"}), 200
-    return jsonify({"error": "Task not found"}), 404
+    data_deleted = delete_task_by_id(task_id)
+    if data_deleted:
+        return jsonify({"message": "Task deleted successfully"}), 200
+    else:
+        return jsonify({"error": "Task not found"}), 404
 
 if __name__ == '__main__':
     app.run(debug=True)
