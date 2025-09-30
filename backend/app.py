@@ -71,7 +71,18 @@ def delete_task_by_id(task_id: str):
                 "message": "Task not found"}
 
 def toggle_task_by_id(task_id:str):
+    # result = get_task_by_id(task_id)[0]
+    # content = result["content"]
+    # id = result["task_id"]
+    # completed = result["completed"]
+    # task = Task(content, id, completed)
+    # task.toggle_task()
+    sql_cmd =f"UPDATE {table_name} SET {column1} = %b ;"
+    execute_qry(sql_cmd, (value1,value2))
+    print("insert success")
     pass
+    
+    
 
 # ------- api with endpoints ----------- #
 
@@ -107,10 +118,7 @@ def add_task():
 
 @app.route("/tasks/<task_id>", methods=['PUT'])
 def update_task(task_id):
-    for task in todos:
-        if task.id == task_id:
-            task.toggle_task()
-            return jsonify(task.to_dict()), 200
+    sql_cmd = f""
     return jsonify({"error": "Task not found"}), 404
 
 @app.route( "/tasks/<task_id>", methods=['DELETE'])
