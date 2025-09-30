@@ -21,20 +21,24 @@ try:
 except mysql.connector.Error as e:
     print(f"fail to connect: {e}")
 
-# general query commands for mysql
+# ---- general query commands for mysql ---- #
 
 def execute_qry(sql_cmd, params):
     cur = db.cursor(dictionary=True)
     try:
-        cur.excecute(sql_cmd, params)
-        if sql_cmd.strip().upper().startswith(("INSERT", "UPDATE", "DELETE")):
+        cur.execute(sql_cmd, params)
+        if sql_cmd.strip().upper().startswith(("INSERT")):
+            db.commit()
+            print("Insertion committed to the database.")
+            return cur.lastrowid if cur.lastrowid else None
+        elif sql_cmd.strip().upper().startswith(("UPDATE", "DELETE")):
             db.commit()
             print("Changes committed to the database.")
-            return cur.lastrowid if cur.lastrowid else None
+            return cur.rowcount if cur.rowcount else None
         else:
                 result = cur.fetchall()
                 return result
-    except mysql.connector.error as e:
+    except mysql.connector.Error as e:
         db.rollback()
         print(f"failed to query: {e}")
     finally: 
@@ -51,14 +55,20 @@ def get_all_tasks():
     return results if results else None
 
 def get_task_by_id(task_id: str):
-    sql_cmd = f"SELECT * FROM task WHERE id = %s"
-    results = execute_qry(sql_cmd,())
+    sql_cmd = f"SELECT * FROM task WHERE task_id = %s"
+    results = execute_qry(sql_cmd,(task_id,))
     return results[0] if results else None
 
 def delete_task_by_id(task_id: str):
-    sql_cmd = f"DELETE FROM task WHERE id = %s"
-    results = execute_qry(sql_cmd, task_id)
-    return results[0] if results else None
+    sql_cmd = f"DELETE FROM task WHERE task_id = %s"
+    results = execute_qry(sql_cmd, (task_id,))
+    if results:
+        return {"success": True, 
+                "message": "Task deleted.",
+                "rows_deleted": results}
+    else:
+        return {"success": False, 
+                "message": "Task not found"}
 
 def toggle_task_by_id(task_id:str):
     pass
@@ -76,6 +86,14 @@ def get_tasks():
         return jsonify(task_data), 200
     else: 
         return jsonify({"error": "no tasks found."}), 404
+    
+@app.route("/tasks/<task_id>", methods=['GET'])
+def get_tasks_by_id(task_id):
+    task_data = get_task_by_id(task_id)
+    if task_data:
+        return jsonify(task_data), 200
+    else: 
+        return jsonify({"error": "task not found."}), 404
 
 @app.route("/tasks", methods=['POST'])
 def add_task():
@@ -97,11 +115,11 @@ def update_task(task_id):
 
 @app.route( "/tasks/<task_id>", methods=['DELETE'])
 def delete_task(task_id):
-    data_deleted = delete_task_by_id(task_id)
-    if data_deleted:
-        return jsonify({"message": "Task deleted successfully"}), 200
+    result = delete_task_by_id(task_id)
+    if result["success"]:
+        return jsonify(result), 200
     else:
-        return jsonify({"error": "Task not found"}), 404
+        return jsonify(result), 404
 
 if __name__ == '__main__':
     app.run(debug=True)
