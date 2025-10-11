@@ -9,40 +9,39 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # connecting to db
-try:
-    db = mysql.connector.connect(
+def get_db_connection():
+    return mysql.connector.connect(
         host="localhost",
         user="root",
         passwd="1103",
         db="testdatabase"
     )
-    print("connection successful")
-
-except mysql.connector.Error as e:
-    print(f"fail to connect: {e}")
 
 # ---- general query commands for mysql ---- #
 
 def execute_qry(sql_cmd, params):
-    cur = db.cursor(dictionary=True)
+    conn = get_db_connection()
+    cur = conn.cursor(dictionary=True)
     try:
         cur.execute(sql_cmd, params)
         if sql_cmd.strip().upper().startswith(("INSERT")):
-            db.commit()
+            conn.commit()
             print("Insertion committed to the database.")
             return cur.lastrowid if cur.lastrowid else None
         elif sql_cmd.strip().upper().startswith(("UPDATE", "DELETE")):
-            db.commit()
+            conn.commit()
             print("Changes committed to the database.")
             return cur.rowcount if cur.rowcount else None
         else:
                 result = cur.fetchall()
                 return result
     except mysql.connector.Error as e:
-        db.rollback()
+        conn.rollback()
         print(f"failed to query: {e}")
+        return None
     finally: 
         cur.close()
+        conn.close()
 
 def insert_into_table(table_name:str, column1, column2, value1, value2):
     sql_cmd =f"INSERT INTO {table_name} ({column1}, {column2}) values (%s,%s);"
@@ -71,16 +70,18 @@ def delete_task_by_id(task_id: str):
                 "message": "Task not found"}
 
 def toggle_task_by_id(task_id:str):
-    # result = get_task_by_id(task_id)[0]
-    # content = result["content"]
-    # id = result["task_id"]
-    # completed = result["completed"]
-    # task = Task(content, id, completed)
-    # task.toggle_task()
-    sql_cmd =f"UPDATE {table_name} SET {column1} = %b ;"
-    execute_qry(sql_cmd, (value1,value2))
-    print("insert success")
-    pass
+    sql_cmd =f"UPDATE task SET completed = NOT completed where task_id = %s"
+    results = execute_qry(sql_cmd, (task_id,))
+    if results:
+        return {
+            "success": True,
+            "message": f"Task {task_id} toggeled sucessfully."
+        }
+    else: 
+        return{
+            "success": False,
+            "message" : "Task not found or no change made."
+        }
     
     
 
@@ -118,8 +119,11 @@ def add_task():
 
 @app.route("/tasks/<task_id>", methods=['PUT'])
 def update_task(task_id):
-    sql_cmd = f""
-    return jsonify({"error": "Task not found"}), 404
+    result = toggle_task_by_id(task_id)
+    if result["success"]:
+        return jsonify(result), 200
+    else:
+        return jsonify(result), 404
 
 @app.route( "/tasks/<task_id>", methods=['DELETE'])
 def delete_task(task_id):
