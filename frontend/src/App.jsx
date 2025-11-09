@@ -10,18 +10,23 @@ function App() {
       }, []);
   
       const fetchTasks = async () => {
-          const response = await fetch("http://127.0.0.1:5000/tasks", { method: "GET" });
+          const response = await fetch("http://127.0.0.1:5000/tasks", {method: "GET"});
+          if (!response.ok) {
+            console.error("Failed to fetch tasks");
+            setTasks([]); // prevent crash
+            return;
+            }
           const data = await response.json();
           setTasks(data)
           console.log(data)
       }
   
-      const updateTask = async (id) => {
+      const updateTask = async (task_id) => {
           const options = { 
               method: "PUT" 
           }
           try {
-              const response = await fetch(`http://127.0.0.1:5000/tasks/${id}`, options)
+              const response = await fetch(`http://127.0.0.1:5000/tasks/${task_id}`, options)
               if (response.status == 200) {
                   fetchTasks()
               }
@@ -33,12 +38,12 @@ function App() {
           }
       }
   
-      const deleteTask = async (id) => {
+      const deleteTask = async (task_id) => {
           try {
               const options = {
                   method: "DELETE"
               }
-              const response = await fetch(`http://127.0.0.1:5000/tasks/${id}`, options)
+              const response = await fetch(`http://127.0.0.1:5000/tasks/${task_id}`, options)
               if (response.status == 200) {
                   fetchTasks()
               } else {
@@ -57,8 +62,7 @@ function App() {
               alert("oops- you just entered an empty to-do... What do you want to do? nothing!? ");
               return;
           }
-  
-          const data = { content: newTask };
+          const data = { "content": newTask };
           const url = "http://127.0.0.1:5000/tasks";
           const options = {
               method: "POST",
@@ -68,12 +72,15 @@ function App() {
               body: JSON.stringify(data)
           };
           const response = await fetch(url, options);
-          if (response.status !== 201 && response.status !== 200) {
+          if (response.ok) {
               const data = await response.json();
-              alert(data.message || "Failed to add task");
-              return;
+              setNewTask("");
+              fetchTasks();
+          } else {
+            const data = await response.json();
+            alert(data.message || "Failed to add task");
           }
-          fetchTasks()
+          
       }
   
       return (
@@ -91,11 +98,11 @@ function App() {
                   </div>
                   <ul id="task-list-container">
                       {tasks.map((task) => (
-                          <li key={task.id}>
-                              <span id = "update" onClick={() => updateTask(task.id)}
+                          <li key={task.task_id}>
+                              <span className = "update" onClick={() => updateTask(task.task_id)}
                                   style={{ textDecoration: task.completed ? "line-through" : "none", cursor: "pointer" }}
                               >{task.content}</span>
-                              <span id="delete" onClick={() => deleteTask(task.id)}>&times;</span>
+                              <span className="delete" onClick={() => deleteTask(task.task_id)}>&times;</span>
   
                           </li>
                       ))}

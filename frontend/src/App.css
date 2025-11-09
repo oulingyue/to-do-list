@@ -66,7 +66,7 @@ ul li{
     position: relative;
 }
 
-#delete{
+.delete{
     position: absolute;
     right: 50px;
     width: 40px;
@@ -76,7 +76,7 @@ ul li{
     line-height: 40px;
     text-align: center;
 }
-#delete:hover{
+.delete:hover{
     background: #9d8074;
 }
 
