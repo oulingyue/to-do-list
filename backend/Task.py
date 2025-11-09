@@ -13,11 +13,11 @@ class Task():
     # content = db.Column(db.String(100), nullable=False)
     # completed = db.Column(db.Boolean, default=False)
     # created_at = db.Column(db.DateTime, server_default=db.func.now())
-    def __init__(self, content:str, id = str(uuid.uuid4()), completed = False):
+    def __init__(self, content:str, id = None, completed = False):
         self.content = content
-        self.completed = False
-        self.id = id
-        
+        self.completed = completed
+        self.id = id if id else str(uuid.uuid4())
+
     def toggle_task(self):
         self.completed = not self.completed
 

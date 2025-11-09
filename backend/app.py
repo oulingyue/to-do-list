@@ -49,7 +49,7 @@ def insert_into_table(table_name:str, column1, column2, value1, value2):
     print("insert success")
 
 def get_all_tasks():
-    sql_cmd = f"SELECT * FROM task;"
+    sql_cmd = f"SELECT * FROM task ORDER BY created_at ASC;"
     results = execute_qry(sql_cmd, ())
     return results if results else None
 
@@ -123,6 +123,7 @@ def update_task(task_id):
     if result["success"]:
         return jsonify(result), 200
     else:
+        print(task_id)
         return jsonify(result), 404
 
 @app.route( "/tasks/<task_id>", methods=['DELETE'])
@@ -131,6 +132,7 @@ def delete_task(task_id):
     if result["success"]:
         return jsonify(result), 200
     else:
+        print(task_id)
         return jsonify(result), 404
 
 if __name__ == '__main__':
